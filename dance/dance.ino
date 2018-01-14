@@ -5,14 +5,14 @@ bool nine = false;
 bool ten = false;
 String number = "";
 
-int lightOffTime = 38;
+int lightOffTime = 26500;
 
 void setup() {
   Serial.begin(9600);
   pinMode(9, OUTPUT);
   pinMode(10, OUTPUT);
-  lastNineToggle = millis();
-  lastTenToggle = millis();
+  lastNineToggle = micros();
+  lastTenToggle = micros();
 }
 
 // the loop function runs over and over again forever
@@ -21,38 +21,40 @@ void loop() {
     int digit = Serial.read();
     if (isDigit(digit)) {
       number += (char)digit;
+    }else if (digit == '.') {
+      number += '.';
     }
     if (digit == '\n') {
-      lightOffTime = number.toInt();
-      Serial.println(lightOffTime);
+      lightOffTime = 1000*number.toFloat();
+      Serial.println(number);
       number = "";
     }
   }
   
   if (nine) {
-    if (millis() - lastNineToggle > 1) {//1, electromagnet on time
+    if (micros() - lastNineToggle > 800) {//1000, electromagnet on time
       digitalWrite(9, LOW);
-      lastNineToggle = millis();
+      lastNineToggle = micros();
       nine ^= 1;//toggle boolean
     }
   }else {
-    if (millis() - lastNineToggle > 40) {//40, electromagnet off time
+    if (micros() - lastNineToggle > 30000) {//30000, electromagnet off time
       digitalWrite(9, HIGH);
-      lastNineToggle = millis();
+      lastNineToggle = micros();
       nine ^= 1;//toggle boolean
     }
   }
 
   if (ten) {
-    if (millis() - lastTenToggle > 1) {//1, light on time
+    if (micros() - lastTenToggle > 5000) {//5000, light on time
       digitalWrite(10, LOW);
-      lastTenToggle = millis();
+      lastTenToggle = micros();
       ten ^= 1;//toggle boolean
     }
   }else {
-    if (millis() - lastTenToggle > lightOffTime) {//38, light off time
+    if (micros() - lastTenToggle > lightOffTime) {//26500, light off time
       digitalWrite(10, HIGH);
-      lastTenToggle = millis();
+      lastTenToggle = micros();
       ten ^= 1;//toggle boolean
     }
   }
